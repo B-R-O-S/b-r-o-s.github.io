@@ -2,12 +2,14 @@
 body, html {
     margin: 0;
     padding: 0;
-    font-family: 'Roboto', sans-serif;
+    font-family: 'Poppins', sans-serif;
     scroll-behavior: smooth;
+    color: #333;
 }
 
+/* Header Styling */
 .header {
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
 /* Navbar Styling */
@@ -22,7 +24,7 @@ body, html {
 
 .navbar-brand {
     font-size: 1.5rem;
-    font-weight: bold;
+    font-weight: 600;
     display: flex;
     align-items: center;
 }
@@ -43,8 +45,15 @@ body, html {
     display: flex;
     align-items: center;
     justify-content: center;
+    font-weight: 600;
 }
 
+/* Text Styling */
+.hero h1, .hero p {
+    font-weight: 500;
+}
+
+/* Section Styling */
 .about, .team, .projects, .contact {
     padding: 50px 0;
 }
@@ -57,17 +66,12 @@ body, html {
     transform: scale(1.1);
 }
 
-.footer {
-    background-color: #333;
-    color: #fff;
-    padding: 15px 0;
-}
-
 /* Button Styling */
 .btn-primary {
     background-color: #007bff;
     border-color: #007bff;
     transition: background-color 0.3s ease;
+    font-weight: 500;
 }
 
 .btn-primary:hover {
@@ -78,13 +82,22 @@ body, html {
 /* Project Card Styling */
 .card {
     transition: transform 0.3s ease;
+    font-weight: 500;
 }
 
 .card:hover {
     transform: translateY(-5px);
 }
 
-/* Additional Animations */
+/* Footer Styling */
+.footer {
+    background-color: #333;
+    color: #fff;
+    padding: 15px 0;
+    font-weight: 400;
+}
+
+/* Animations */
 @keyframes fadeInUpCustom {
     from {
         opacity: 0;
