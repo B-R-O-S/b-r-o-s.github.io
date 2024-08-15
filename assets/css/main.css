@@ -10,6 +10,32 @@ body, html {
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
 }
 
+/* Navbar Styling */
+.navbar-dark .navbar-nav .nav-link {
+    color: rgba(255, 255, 255, 0.7);
+    transition: color 0.3s ease-in-out;
+}
+
+.navbar-dark .navbar-nav .nav-link:hover {
+    color: #fff;
+}
+
+.navbar-brand {
+    font-size: 1.5rem;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+}
+
+.navbar-brand i {
+    margin-right: 8px;
+}
+
+.navbar-nav .nav-item {
+    margin-left: 20px;
+}
+
+/* Hero Section */
 .hero {
     background: url('assets/img/hero-bg.jpg') no-repeat center center/cover;
     color: white;
