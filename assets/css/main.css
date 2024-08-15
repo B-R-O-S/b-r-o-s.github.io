@@ -62,4 +62,21 @@ body, html {
 @keyframes fadeInUpCustom {
     from {
         opacity: 0;
-        transform:
+        transform: translateY(50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeInDownCustom {
+    from {
+        opacity: 0;
+        transform: translateY(-50px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
