@@ -3,77 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Advanced Todo App</title>
-    <!-- Core Libraries -->
+    <title>Task Master</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/pikaday/1.8.0/css/pikaday.min.css" rel="stylesheet">
-
-    <!-- Main CSS -->
+    
+    <!-- MAIN CSS -->
     <link rel="stylesheet" href="/assets/css/todo.css">
 </head>
-<body class="bg-gray-100 min-h-screen">
-    <div class="container mx-auto p-8 max-w-4xl">
-        <div class="bg-white rounded-lg shadow-lg p-6 mb-6 animate__animated animate__fadeIn">
-            <div class="flex justify-between items-center mb-6">
+<body class="min-h-screen p-8">
+    <div class="container mx-auto max-w-4xl">
+        <div class="card p-8">
+            <!-- Header -->
+            <div class="flex justify-between items-center mb-4">
                 <div>
                     <h1 class="text-3xl font-bold text-gray-800">Task Master</h1>
-                    <p class="text-gray-600" id="motivationalQuote">Loading daily quote...</p>
+                    <p class="text-gray-600">Believe in yourself!</p>
                 </div>
                 <div class="flex gap-4">
-                    <button id="addTaskBtn" class="bg-blue-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-blue-600 transition-all transform hover:scale-105">
+                    <button id="addTaskBtn" class="btn-primary text-white px-4 py-2 rounded-lg flex items-center gap-2">
                         <i class="fas fa-plus"></i> Add Task
                     </button>
-                    <button id="viewStatsBtn" class="bg-purple-500 text-white px-4 py-2 rounded-lg flex items-center gap-2 hover:bg-purple-600 transition-all" onclick="toggleGraphVisibility()">
+                    <button id="viewGraphBtn" class="btn-secondary text-white px-4 py-2 rounded-lg flex items-center gap-2">
                         <i class="fas fa-chart-bar"></i> View Graph
                     </button>
                 </div>
             </div>
 
-            <!-- Search Div -->
+            <!-- Search -->
             <div class="mb-6">
-                <input type="text" id="searchInput" class="w-full p-2 border rounded-lg" placeholder="Search Tasks...">
+                <input type="text" id="searchInput" class="w-full p-3 border rounded-lg" placeholder="Search Tasks...">
             </div>
 
-            <!-- Progress Overview -->
+            <!-- Statistics -->
             <div class="grid grid-cols-4 gap-4 mb-6">
-                <div class="bg-blue-50 p-4 rounded-lg">
+                <div class="stat-card total rounded-lg p-4">
                     <div class="flex justify-between items-center">
                         <div>
-                            <h3 class="text-lg font-semibold text-blue-700" id="totalTasks">0</h3>
+                            <h3 class="text-2xl font-bold text-blue-600" id="totalTasks">0</h3>
                             <p class="text-sm text-blue-600">Total Tasks</p>
                         </div>
-                        <i class="fas fa-tasks text-blue-500 text-2xl"></i>
+                        <i class="fas fa-tasks text-blue-500 text-xl"></i>
                     </div>
                 </div>
-                <div class="bg-green-50 p-4 rounded-lg">
+                <div class="stat-card completed rounded-lg p-4">
                     <div class="flex justify-between items-center">
                         <div>
-                            <h3 class="text-lg font-semibold text-green-700" id="completedTasks">0</h3>
+                            <h3 class="text-2xl font-bold text-green-600" id="completedTasks">0</h3>
                             <p class="text-sm text-green-600">Completed</p>
                         </div>
-                        <i class="fas fa-check-circle text-green-500 text-2xl"></i>
+                        <i class="fas fa-check-circle text-green-500 text-xl"></i>
                     </div>
                 </div>
-                <div class="bg-yellow-50 p-4 rounded-lg">
+                <div class="stat-card upcoming rounded-lg p-4">
                     <div class="flex justify-between items-center">
                         <div>
-                            <h3 class="text-lg font-semibold text-yellow-700" id="upcomingTasks">0</h3>
+                            <h3 class="text-2xl font-bold text-yellow-600" id="upcomingTasks">0</h3>
                             <p class="text-sm text-yellow-600">Upcoming</p>
                         </div>
-                        <i class="fas fa-clock text-yellow-500 text-2xl"></i>
+                        <i class="fas fa-clock text-yellow-500 text-xl"></i>
                     </div>
                 </div>
-                <div class="bg-red-50 p-4 rounded-lg">
+                <div class="stat-card overdue rounded-lg p-4">
                     <div class="flex justify-between items-center">
                         <div>
-                            <h3 class="text-lg font-semibold text-red-700" id="overdueTasks">0</h3>
+                            <h3 class="text-2xl font-bold text-red-600" id="overdueTasks">0</h3>
                             <p class="text-sm text-red-600">Overdue</p>
                         </div>
-                        <i class="fas fa-exclamation-circle text-red-500 text-2xl"></i>
+                        <i class="fas fa-exclamation-circle text-red-500 text-xl"></i>
                     </div>
                 </div>
             </div>
@@ -82,65 +78,52 @@
             <div id="taskList" class="space-y-4"></div>
 
             <!-- Graph Section -->
-            <div id="graphSection" class="hidden">
-                <canvas id="taskGraph" width="400" height="200"></canvas>
-            </div>
-        </div>
-
-        <!-- Task Form Modal -->
-        <div id="taskFormModal" class="flex">
-            <div class="modal-content">
-                <h2 class="text-2xl font-bold mb-4">Add New Task</h2>
-                <form id="taskForm" class="space-y-4">
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Title</label>
-                        <input type="text" id="taskTitle" class="w-full p-2 border rounded-lg">
-                        <span id="taskTitleError" class="text-red-500 text-xs hidden">Title is required</span>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Description</label>
-                        <textarea id="taskDescription" class="w-full p-2 border rounded-lg"></textarea>
-                        <span id="taskDescriptionError" class="text-red-500 text-xs hidden">Description is required</span>
-                    </div>
-                    <div class="grid grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Due Date</label>
-                            <input type="text" id="taskDueDate" class="w-full p-2 border rounded-lg">
-                            <span id="taskDueDateError" class="text-red-500 text-xs hidden">Due Date is required</span>
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium mb-1">Priority</label>
-                            <select id="taskPriority" class="w-full p-2 border rounded-lg">
-                                <option value="low">Low</option>
-                                <option value="medium">Medium</option>
-                                <option value="high">High</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Tags</label>
-                        <input type="text" id="taskTags" class="w-full p-2 border rounded-lg">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-medium mb-1">Time Estimate (in minutes)</label>
-                        <input type="number" id="taskTimeEstimate" class="w-full p-2 border rounded-lg" min="1" max="120">
-                    </div>
-                    <div class="flex justify-end gap-4">
-                        <button type="button" id="closeModal" class="bg-gray-400 text-white px-4 py-2 rounded-lg">Cancel</button>
-                        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-lg">Save Task</button>
-                    </div>
-                </form>
+            <div id="graphSection" class="hidden mt-6">
+                <canvas id="taskGraph" class="w-full"></canvas>
             </div>
         </div>
     </div>
 
-    <!-- Core Libraries -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/1.0.0-beta.1/axios.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pikaday/1.8.0/pikaday.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/toastr.js/latest/toastr.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/noUiSlider/15.7.1/nouislider.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
+    <!-- Task Modal -->
+    <div id="taskModal" class="fixed inset-0 hidden modal flex items-center justify-center">
+        <div class="bg-white rounded-lg p-6 w-full max-w-md">
+            <h2 class="text-2xl font-bold mb-4">Add New Task</h2>
+            <form id="taskForm">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Title</label>
+                        <input type="text" id="taskTitle" class="w-full p-2 border rounded-lg" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Due Date</label>
+                        <input type="date" id="taskDueDate" class="w-full p-2 border rounded-lg" required>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Priority</label>
+                        <select id="taskPriority" class="w-full p-2 border rounded-lg">
+                            <option value="low">Low</option>
+                            <option value="medium">Medium</option>
+                            <option value="high">High</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium mb-1">Description</label>
+                        <textarea id="taskDescription" class="w-full p-2 border rounded-lg" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="flex justify-end gap-4 mt-6">
+                    <button type="button" id="cancelTaskBtn" class="px-4 py-2 text-gray-600 hover:text-gray-800">
+                        Cancel
+                    </button>
+                    <button type="submit" class="btn-primary text-white px-4 py-2 rounded-lg">
+                        Add Task
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.7.1/chart.min.js"></script>
     <script src="/assets/js/todo.js" defer></script>
 </body>
 </html>
