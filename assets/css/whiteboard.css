@@ -1,240 +1,188 @@
-$(document).ready(function () {
-    const canvas = new fabric.Canvas('whiteboard');
-    const penSizeInput = $('#penSize');
-    const penColorInput = $('#penColor');
-    const eraserSizeInput = $('#eraserSize');
-    const notification = $('#notification');
-    const eraserPreviewElement = $('#eraser-preview');
-    const history = [];
-    const redoStack = [];
+:root {
+    --toolbar-bg: rgba(255, 255, 255, 0.95);
+    --toolbar-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    --btn-hover-bg: rgba(0, 123, 255, 0.1);
+    --btn-active-bg: #007bff;
+    --transition-timing: cubic-bezier(0.4, 0, 0.2, 1);
+}
 
-    const DEFAULT_PEN_SIZE = 5;
-    const DEFAULT_ERASER_SIZE = 10;
+body {
+    margin: 0;
+    overflow: hidden;
+    background: #f8f9fa;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+}
 
-    function initializeCanvas() {
-        canvas.setWidth(window.innerWidth);
-        canvas.setHeight(window.innerHeight);
-        canvas.backgroundColor = 'white';
-        canvas.renderAll();
+#canvas-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: white;
+}
+
+#whiteboard {
+    cursor: crosshair;
+    touch-action: none;
+}
+
+.toolbar {
+    position: fixed;
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--toolbar-bg);
+    padding: 15px;
+    border-radius: 15px;
+    box-shadow: var(--toolbar-shadow);
+    z-index: 1000;
+    display: flex;
+    gap: 20px;
+    transition: all 0.3s var(--transition-timing);
+}
+
+.toolbar-group {
+    display: flex;
+    gap: 10px;
+    padding: 0 10px;
+    border-right: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.toolbar-group:last-child {
+    border-right: none;
+}
+
+.btn-tool {
+    width: 45px;
+    height: 45px;
+    border-radius: 50%;
+    border: none;
+    background: white;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s var(--transition-timing);
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.btn-tool:hover {
+    transform: translateY(-2px);
+    background: var(--btn-hover-bg);
+}
+
+.btn-tool.active {
+    background: var(--btn-active-bg);
+    color: white;
+    transform: translateY(-2px);
+}
+
+.tool-options {
+    position: fixed;
+    bottom: 100px;
+    left: 50%;
+    transform: translateX(-50%) translateY(20px);
+    background: var(--toolbar-bg);
+    padding: 20px;
+    border-radius: 15px;
+    box-shadow: var(--toolbar-shadow);
+    z-index: 1000;
+    min-width: 250px;
+    opacity: 0;
+    visibility: hidden;
+    transition: all 0.3s var(--transition-timing);
+}
+
+.tool-options.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateX(-50%) translateY(0);
+}
+
+.option-group {
+    margin-bottom: 15px;
+}
+
+.option-group:last-child {
+    margin-bottom: 0;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+.form-range {
+    width: 100%;
+}
+
+.size-preview {
+    width: 100%;
+    height: 40px;
+    margin-top: 10px;
+    border-radius: 8px;
+    background: #f8f9fa;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#eraser-preview {
+    position: absolute;
+    border: 2px dotted black; /* Dotted border for visibility */
+    pointer-events: none; /* So it does not block canvas interactions */
+    display: none; /* Start as hidden */
+    border-radius: 10px; /* Rounded corners */
+}
+
+.size-preview::after {
+    content: '';
+    border-radius: 50%;
+    background: #000;
+    transition: all 0.2s var(--transition-timing);
+}
+
+#penSizePreview::after {
+    background: var(--pen-color, #000);
+}
+
+#eraserSizePreview::after {
+    background: #ddd;
+}
+
+.notification {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 15px 25px;
+    background: var(--toolbar-bg);
+    border-radius: 8px;
+    box-shadow: var(--toolbar-shadow);
+    transform: translateX(150%);
+    transition: transform 0.3s var(--transition-timing);
+    z-index: 1100;
+}
+
+.notification.show {
+    transform: translateX(0);
+}
+
+@media (max-width: 768px) {
+    .toolbar {
+        bottom: 10px;
+        padding: 10px;
     }
 
-    function setupDrawingOptions() {
-        if (canvas.isDrawingMode) {
-            if (canvas.freeDrawingBrush.color === 'white') {
-                canvas.freeDrawingBrush.width = parseInt(eraserSizeInput.val());
-            } else {
-                canvas.freeDrawingBrush.width = parseInt(penSizeInput.val());
-                canvas.freeDrawingBrush.color = penColorInput.val();
-            }
-        }
+    .btn-tool {
+        width: 40px;
+        height: 40px;
     }
 
-    function setupEventListeners() {
-        $(window).resize(initializeCanvas);
-        penSizeInput.on('input', updatePenOptions);
-        eraserSizeInput.on('input', updateEraserOptions);
-        penColorInput.on('input', updatePenColor);
-        
-        canvas.on('mouse:down', addToHistory);
-        canvas.on('mouse:move', handleMouseMove);
-        canvas.on('mouse:out', hideEraserPreview);
-        
-        $('.btn-tool').click(handleToolClick);
-        $('#confirmAction').on('click', handleConfirmClearCanvas);
-        
-        $(document).keydown(handleKeyboardShortcuts);
+    .tool-options {
+        bottom: 80px;
+        min-width: 200px;
     }
-
-    function updatePenOptions() {
-        const penSize = penSizeInput.val();
-        $('#penSizePreview').css({
-            background: penColorInput.val(),
-            width: penSize + 'px',
-            height: penSize + 'px',
-            borderRadius: '50%'  // Make preview circular
-        });
-        if (canvas.isDrawingMode && canvas.freeDrawingBrush.color !== 'white') {
-            setupDrawingOptions();
-        }
-    }
-
-    function updateEraserOptions() {
-        const eraserSize = eraserSizeInput.val();
-        $('#eraserSizePreview').css({
-            width: eraserSize + 'px',
-            height: eraserSize + 'px',
-            borderRadius: '50%',  // Make preview circular
-            margin: '0 auto'      // Center it horizontally in its parent div
-        });
-        if (canvas.isDrawingMode && canvas.freeDrawingBrush.color === 'white') {
-            setupDrawingOptions();
-        }
-        updateEraserPreview();
-    }
-
-    function updatePenColor() {
-        $('#penSizePreview').css('background', penColorInput.val());
-        if (canvas.isDrawingMode && canvas.freeDrawingBrush.color !== 'white') {
-            setupDrawingOptions();
-        }
-    }
-
-    function handleToolClick() {
-        const tool = $(this).data('tool');
-        const action = $(this).data('action');
-
-        $('.btn-tool').removeClass('active');
-
-        if (tool === 'pen') {
-            enableDrawing();
-            $('#pen-options').fadeIn(300).addClass('show');
-            $(this).addClass('active');
-        } else if (tool === 'eraser') {
-            enableEraser();
-            $('#eraser-options').fadeIn(300).addClass('show');
-            $(this).addClass('active');
-        } else if (action === 'clear') {
-            showConfirmation("Are you sure you want to clear the canvas?");
-        } else if (action === 'save') {
-            saveCanvas();
-        } else if (action === 'undo') {
-            undo();
-        } else if (action === 'redo') {
-            redo();
-        }
-
-        $('.tool-options').not(`#${tool}-options`).fadeOut(300).removeClass('show');
-    }
-
-    function showConfirmation(message) {
-        $('#modalMessage').text(message);
-        $('#confirmationModal').modal('show');
-    }
-
-    function handleConfirmClearCanvas() {
-        $('#confirmationModal').modal('hide');
-        clearCanvas();
-    }
-
-    function enableDrawing() {
-        canvas.isDrawingMode = true;
-        canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
-        setupDrawingOptions();
-        hideEraserPreview();
-    }
-
-    function enableEraser() {
-        canvas.isDrawingMode = true;
-        canvas.freeDrawingBrush = new fabric.PencilBrush(canvas);
-        canvas.freeDrawingBrush.color = 'white';
-        setupDrawingOptions();
-        showEraserPreview();
-    }
-
-    function clearCanvas() {
-        canvas.clear();
-        canvas.backgroundColor = 'white';
-        canvas.renderAll();
-        showNotification("Canvas cleared!");
-        resetHistory();
-    }
-
-    function resetHistory() {
-        history.length = 0;
-        redoStack.length = 0;
-    }
-
-    function saveCanvas() {
-        const link = document.createElement('a');
-        link.download = 'whiteboard.png';
-        link.href = canvas.toDataURL();
-        link.click();
-        showNotification("Canvas saved as image!");
-    }
-
-    function addToHistory() {
-        if (history.length === 10) history.shift();
-        history.push(canvas.toDataURL());
-        redoStack.length = 0;
-    }
-
-    function undo() {
-        if (history.length > 0) {
-            redoStack.push(canvas.toDataURL());
-            const lastState = history.pop();
-            fabric.Image.fromURL(lastState, function(img) {
-                canvas.clear();
-                canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas));
-            });
-        }
-    }
-
-    function redo() {
-        if (redoStack.length > 0) {
-            const lastRedo = redoStack.pop();
-            history.push(canvas.toDataURL());
-            fabric.Image.fromURL(lastRedo, function(img) {
-                canvas.clear();
-                canvas.setBackgroundImage(img, canvas.renderAll.bind(canvas));
-            });
-        }
-    }
-
-    function updateEraserPreview() {
-        const eraserSize = parseInt(eraserSizeInput.val());
-        eraserPreviewElement.css({
-            width: eraserSize + 'px',
-            height: eraserSize + 'px',
-            border: '2px dotted black',
-            position: 'absolute',
-            display: 'block',
-            borderRadius: '50%'  // Make eraser preview circular
-        });
-    }
-
-    function showEraserPreview() {
-        $(document).on('mousemove', function (e) {
-            const eraserSize = parseInt(eraserSizeInput.val());
-            eraserPreviewElement.css({
-                left: e.pageX - eraserSize / 2,
-                top: e.pageY - eraserSize / 2,
-            }).fadeIn(100);
-        });
-    }
-
-    function hideEraserPreview() {
-        eraserPreviewElement.fadeOut(100);
-        $(document).off('mousemove');
-    }
-
-    function handleMouseMove(e) {
-        if (canvas.isDrawingMode && canvas.freeDrawingBrush.color === 'white') {
-            showEraserPreview();
-        }
-    }
-
-    function handleKeyboardShortcuts(e) {
-        switch (e.key) {
-            case 'p':
-                enableDrawing();
-                break;
-            case 'z':
-                if (e.ctrlKey) undo();
-                break;
-            case 'y':
-                if (e.ctrlKey) redo();
-                break;
-        }
-    }
-
-    function showNotification(message) {
-        notification.text(message).fadeIn(300).delay(2000).fadeOut(300);
-    }
-
-    penSizeInput.val(DEFAULT_PEN_SIZE).trigger('input');
-    eraserSizeInput.val(DEFAULT_ERASER_SIZE).trigger('input');
-    $('.btn-tool[data-tool="pen"]').click();
-
-    setupEventListeners();
-    initializeCanvas();
-});
+}
+ 
