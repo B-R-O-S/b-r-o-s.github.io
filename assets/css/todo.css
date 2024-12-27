@@ -1,92 +1,59 @@
-        .todo-item.completed { background-color: #f9fafb; }
-        .todo-item.completed .todo-text {
-            text-decoration: line-through;
-            color: #6b7280;
+        body {
+            background: #f8f7ff;
         }
-        .priority-high { color: #ef4444; }
-        .priority-medium { color: #f59e0b; }
-        .priority-low { color: #10b981; }
-
-        .slide-enter {
-            animation: slideIn 0.3s ease-out;
+        
+        .card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
 
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(-20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        .stat-card {
+            transition: transform 0.2s;
+            cursor: pointer;
         }
 
-        .progress-ring {
-            transform: rotate(-90deg);
+        .stat-card:hover {
+            transform: translateY(-2px);
         }
 
-        .tag {
-            transition: all 0.2s;
-        }
-        .tag:hover {
-            transform: scale(1.05);
+        .stat-card.total {
+            background-color: #f0f4ff;
         }
 
-        #taskFormModal {
-            display: none;
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.5);
-            justify-content: center;
-            align-items: center;
-            z-index: 1000;
-            opacity: 0;
-            transition: opacity 0.3s ease;
+        .stat-card.completed {
+            background-color: #f0fff4;
         }
 
-        #taskFormModal.show {
-            opacity: 1;
-            display: flex;
+        .stat-card.upcoming {
+            background-color: #fffbeb;
         }
 
-        .modal-content {
-            background-color: white;
-            padding: 20px;
-            border-radius: 8px;
-            width: 500px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        .stat-card.overdue {
+            background-color: #fff0f0;
         }
 
-        ::-webkit-scrollbar {
-            width: 8px;
+        .btn-primary {
+            background-color: #4177fc;
         }
 
-        ::-webkit-scrollbar-track {
-            background: #f1f1f1;
+        .btn-secondary {
+            background-color: #8b5cf6;
         }
 
-        ::-webkit-scrollbar-thumb {
-            background: #888;
-            border-radius: 4px;
+        .modal {
+            background-color: rgba(0, 0, 0, 0.5);
         }
 
-        ::-webkit-scrollbar-thumb:hover {
-            background: #555;
+        .todo-item {
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
         }
 
-        .dropdown-content {
-            display: none;
-            position: absolute;
-            background-color: white;
-            min-width: 160px;
-            z-index: 1;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-            border-radius: 8px;
-            top: 100%;
-            right: 0;
+        .todo-item:hover {
+            transform: translateY(-2px);
         }
 
-        .dropdown:hover .dropdown-content {
-            display: block;
-        }
+        .priority-high { border-left-color: #ef4444; }
+        .priority-medium { border-left-color: #f59e0b; }
+        .priority-low { border-left-color: #10b981; }
