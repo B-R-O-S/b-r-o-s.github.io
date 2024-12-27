@@ -1,172 +1,178 @@
-        const taskList = document.getElementById('taskList');
-        const taskFormModal = document.getElementById('taskFormModal');
-        const taskForm = document.getElementById('taskForm');
-        const taskTitleInput = document.getElementById('taskTitle');
-        const taskDescriptionInput = document.getElementById('taskDescription');
-        const taskDueDateInput = document.getElementById('taskDueDate');
-        const taskPriorityInput = document.getElementById('taskPriority');
-        const taskTagsInput = document.getElementById('taskTags');
-        const taskTimeEstimateInput = document.getElementById('taskTimeEstimate');
-        const addTaskBtn = document.getElementById('addTaskBtn');
-        const closeModalBtn = document.getElementById('closeModal');
-        const motivationalQuote = document.getElementById('motivationalQuote');
-        const totalTasksEl = document.getElementById('totalTasks');
-        const completedTasksEl = document.getElementById('completedTasks');
-        const upcomingTasksEl = document.getElementById('upcomingTasks');
-        const overdueTasksEl = document.getElementById('overdueTasks');
-        const searchInput = document.getElementById('searchInput');
-        const graphSection = document.getElementById('graphSection');
-        let taskData = JSON.parse(localStorage.getItem('tasks')) || [];
-
-        // Initialize the Pikaday date picker
-        new Pikaday({ field: taskDueDateInput });
-
-        // Load motivational quote
-        motivationalQuote.innerText = "Believe in yourself!";
-
-        // Close Modal Action
-        closeModalBtn.addEventListener('click', () => {
-            taskFormModal.classList.remove('show');
-        });
-
-        // Open Modal
-        addTaskBtn.addEventListener('click', () => {
-            taskFormModal.classList.add('show');
-        });
-
-        // Handle Task Submission with Validation
-        taskForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const title = taskTitleInput.value.trim();
-            const description = taskDescriptionInput.value.trim();
-            const dueDate = taskDueDateInput.value.trim();
-            const priority = taskPriorityInput.value;
-            const tags = taskTagsInput.value.trim().split(',').map(tag => tag.trim());
-            const timeEstimate = taskTimeEstimateInput.value;
-
-            // Validation
-            let isValid = true;
-
-            if (!title) {
-                document.getElementById('taskTitleError').classList.remove('hidden');
-                isValid = false;
-            } else {
-                document.getElementById('taskTitleError').classList.add('hidden');
+        class TaskManager {
+            constructor() {
+                this.tasks = JSON.parse(localStorage.getItem('tasks')) || [];
+                this.initializeApp();
             }
 
-            if (!description) {
-                document.getElementById('taskDescriptionError').classList.remove('hidden');
-                isValid = false;
-            } else {
-                document.getElementById('taskDescriptionError').classList.add('hidden');
+            initializeApp() {
+                this.setupEventListeners();
+                this.updateUI();
             }
 
-            if (!dueDate) {
-                document.getElementById('taskDueDateError').classList.remove('hidden');
-                isValid = false;
-            } else {
-                document.getElementById('taskDueDateError').classList.add('hidden');
+            setupEventListeners() {
+                // Add Task Button
+                document.getElementById('addTaskBtn').addEventListener('click', () => {
+                    document.getElementById('taskModal').classList.remove('hidden');
+                });
+
+                // Cancel Button
+                document.getElementById('cancelTaskBtn').addEventListener('click', () => {
+                    document.getElementById('taskModal').classList.add('hidden');
+                });
+
+                // View Graph Button
+                document.getElementById('viewGraphBtn').addEventListener('click', () => {
+                    const graphSection = document.getElementById('graphSection');
+                    graphSection.classList.toggle('hidden');
+                    if (!graphSection.classList.contains('hidden')) {
+                        this.updateGraph();
+                    }
+                });
+
+                // Task Form
+                document.getElementById('taskForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.addTask();
+                });
+
+                // Search
+                document.getElementById('searchInput').addEventListener('input', (e) => {
+                    this.filterTasks(e.target.value);
+                });
             }
 
-            if (!isValid) return;
+            addTask() {
+                const title = document.getElementById('taskTitle').value;
+                const dueDate = document.getElementById('taskDueDate').value;
+                const priority = document.getElementById('taskPriority').value;
+                const description = document.getElementById('taskDescription').value;
 
-            const newTask = {
-                title,
-                description,
-                dueDate,
-                priority,
-                tags,
-                timeEstimate,
-                completed: false
-            };
+                const task = {
+                    id: Date.now(),
+                    title,
+                    dueDate,
+                    priority,
+                    description,
+                    completed: false,
+                    createdAt: new Date().toISOString()
+                };
 
-            taskData.push(newTask);
-            localStorage.setItem('tasks', JSON.stringify(taskData)); // Save to Local Storage
-            updateTaskList();
-            updateStats();
-            taskFormModal.classList.remove('show');
-            toastr.success('Task added successfully!');
-        });
+                this.tasks.push(task);
+                this.saveTasks();
+                this.updateUI();
+                document.getElementById('taskModal').classList.add('hidden');
+                document.getElementById('taskForm').reset();
+            }
 
-        // Update Task List UI
-        function updateTaskList() {
-            taskList.innerHTML = ''; // Clear the current list
-            taskData.forEach((task, index) => {
-                const taskDiv = document.createElement('div');
-                taskDiv.classList.add('todo-item', 'bg-white', 'p-4', 'rounded-lg', 'shadow-lg', 'transition-transform', 'duration-300', 'transform', 'hover:scale-105', 'relative');
-                if (task.completed) {
-                    taskDiv.classList.add('completed');
+            deleteTask(id) {
+                this.tasks = this.tasks.filter(task => task.id !== id);
+                this.saveTasks();
+                this.updateUI();
+            }
+
+            toggleTaskComplete(id) {
+                const task = this.tasks.find(task => task.id === id);
+                if (task) {
+                    task.completed = !task.completed;
+                    this.saveTasks();
+                    this.updateUI();
                 }
-                taskDiv.innerHTML = `
+            }
+
+            filterTasks(searchTerm) {
+                const taskList = document.getElementById('taskList');
+                taskList.innerHTML = '';
+                
+                const filteredTasks = this.tasks.filter(task => 
+                    task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    task.description.toLowerCase().includes(searchTerm.toLowerCase())
+                );
+
+                filteredTasks.forEach(task => {
+                    taskList.appendChild(this.createTaskElement(task));
+                });
+            }
+
+            updateUI() {
+                this.updateTaskList();
+                this.updateStats();
+                if (!document.getElementById('graphSection').classList.contains('hidden')) {
+                    this.updateGraph();
+                }
+            }
+
+            updateTaskList() {
+                const taskList = document.getElementById('taskList');
+                taskList.innerHTML = '';
+                this.tasks.forEach(task => {
+                    taskList.appendChild(this.createTaskElement(task));
+                });
+            }
+
+            createTaskElement(task) {
+                const div = document.createElement('div');
+                div.className = `todo-item bg-white p-4 rounded-lg shadow priority-${task.priority} ${task.completed ? 'opacity-60' : ''}`;
+                div.innerHTML = `
                     <div class="flex justify-between items-center">
-                        <div>
-                            <h3 class="text-xl font-semibold">${task.title}</h3>
-                            <p class="text-gray-600">${task.description}</p>
-                            <p class="text-sm text-gray-400">Due: ${task.dueDate}</p>
-                        </div>
-                        <div class="flex items-center gap-2">
-                            <span class="tag text-xs py-1 px-3 rounded-lg ${task.priority === 'high' ? 'bg-red-200' : task.priority === 'medium' ? 'bg-yellow-200' : 'bg-green-200'}">${task.priority}</span>
-                            <div class="dropdown relative">
-                                <button class="text-gray-500 text-xs">
-                                    <i class="fas fa-ellipsis-v"></i>
-                                </button>
-                                <div class="dropdown-content bg-white p-2 shadow-lg rounded-lg">
-                                    <button class="text-blue-500 text-xs" onclick="editTask(${index})">Edit</button>
-                                    <button class="text-green-500 text-xs" onclick="completeTask(${index})">${task.completed ? 'Undo' : 'Complete'}</button>
-                                    <button class="text-red-500 text-xs" onclick="deleteTask(${index})">Delete</button>
-                                </div>
+                        <div class="flex items-center gap-4">
+                            <input type="checkbox" ${task.completed ? 'checked' : ''} 
+                                onchange="taskManager.toggleTaskComplete(${task.id})">
+                            <div>
+                                <h3 class="font-semibold ${task.completed ? 'line-through' : ''}">${task.title}</h3>
+                                <p class="text-sm text-gray-600">Due: ${task.dueDate}</p>
                             </div>
                         </div>
+                        <button onclick="taskManager.deleteTask(${task.id})" class="text-red-500 hover:text-red-700">
+                            <i class="fas fa-trash"></i>
+                        </button>
                     </div>
                 `;
-                taskList.appendChild(taskDiv);
-            });
+                return div;
+            }
+
+            updateStats() {
+                const now = new Date();
+                document.getElementById('totalTasks').textContent = this.tasks.length;
+                document.getElementById('completedTasks').textContent = 
+                    this.tasks.filter(task => task.completed).length;
+                document.getElementById('upcomingTasks').textContent = 
+                    this.tasks.filter(task => !task.completed && new Date(task.dueDate) > now).length;
+                document.getElementById('overdueTasks').textContent = 
+                    this.tasks.filter(task => !task.completed && new Date(task.dueDate) < now).length;
+            }
+
+            updateGraph() {
+                const ctx = document.getElementById('taskGraph').getContext('2d');
+                const completedTasks = this.tasks.filter(task => task.completed).length;
+                const pendingTasks = this.tasks.filter(task => !task.completed).length;
+
+                if (this.chart) {
+                    this.chart.destroy();
+                }
+
+                this.chart = new Chart(ctx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Completed', 'Pending'],
+                        datasets: [{
+                            data: [completedTasks, pendingTasks],
+                            backgroundColor: ['#10b981', '#6b7280']
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+            }
+
+            saveTasks() {
+                localStorage.setItem('tasks', JSON.stringify(this.tasks));
+            }
         }
 
-        // Update Stats
-        function updateStats() {
-            totalTasksEl.innerText = taskData.length;
-            completedTasksEl.innerText = taskData.filter(task => task.completed).length;
-            upcomingTasksEl.innerText = taskData.filter(task => !task.completed && new Date(task.dueDate) > new Date()).length;
-            overdueTasksEl.innerText = taskData.filter(task => !task.completed && new Date(task.dueDate) < new Date()).length;
-        }
-
-        // Toggle Graph Visibility
-        function toggleGraphVisibility() {
-            graphSection.classList.toggle('hidden');
-        }
-
-        // Delete Task
-        function deleteTask(index) {
-            taskData.splice(index, 1);
-            localStorage.setItem('tasks', JSON.stringify(taskData));
-            updateTaskList();
-            updateStats();
-            toastr.success('Task deleted successfully!');
-        }
-
-        // Complete/Undo Task
-        function completeTask(index) {
-            taskData[index].completed = !taskData[index].completed;
-            localStorage.setItem('tasks', JSON.stringify(taskData));
-            updateTaskList();
-            updateStats();
-            toastr.success(taskData[index].completed ? 'Task completed!' : 'Task undone!');
-        }
-
-        // Edit Task
-        function editTask(index) {
-            const task = taskData[index];
-            taskTitleInput.value = task.title;
-            taskDescriptionInput.value = task.description;
-            taskDueDateInput.value = task.dueDate;
-            taskPriorityInput.value = task.priority;
-            taskTagsInput.value = task.tags.join(', ');
-            taskTimeEstimateInput.value = task.timeEstimate;
-            taskData.splice(index, 1); // Remove task temporarily for editing
-            taskFormModal.classList.add('show');
-        }
-
-        // Initial Data Load
-        updateTaskList();
-        updateStats();
+        const taskManager = new TaskManager();
