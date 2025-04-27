@@ -1,0 +1,84 @@
+html {
+    scroll-behavior: smooth;
+}
+
+.hero-section {
+    background-image: linear-gradient(rgba(15, 23, 42, 0.8), rgba(15, 23, 42, 0.9)), url('https://images.unsplash.com/photo-1519389950473-47ba0277781c?q=80&w=2070');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+}
+
+.nav-link {
+    position: relative;
+}
+
+.nav-link::after {
+    content: '';
+    position: absolute;
+    width: 0;
+    height: 2px;
+    background-color: #0ca6f2;
+    bottom: -5px;
+    left: 0;
+    transition: width 0.3s ease;
+}
+
+.nav-link:hover::after {
+    width: 100%;
+}
+
+.card-hover {
+    transition: all 0.3s ease;
+}
+
+.card-hover:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.team-img-container {
+    position: relative;
+    overflow: hidden;
+}
+
+.team-img-container:hover img {
+    transform: scale(1.05);
+}
+
+.team-img-container img {
+    transition: transform 0.5s ease;
+}
+
+.team-overlay {
+    position: absolute;
+    bottom: -50px;
+    left: 0;
+    right: 0;
+    background: linear-gradient(to top, rgba(15, 23, 42, 0.8), transparent);
+    padding: 20px;
+    transition: bottom 0.3s ease;
+}
+
+.team-img-container:hover .team-overlay {
+    bottom: 0;
+}
+
+.progress-bar {
+    height: 3px;
+    background-color: #0ca6f2;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1000;
+}
+
+.input-focus {
+    transition: all 0.3s ease;
+    border-color: transparent;
+}
+
+.input-focus:focus {
+    border-color: #0ca6f2;
+    box-shadow: 0 0 0 3px rgba(12, 166, 242, 0.2);
+}
